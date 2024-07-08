@@ -1,0 +1,158 @@
+type DeployV2 @entity(immutable: true) {
+  id: ID!
+  agencyImplementation: Bytes! # address
+  agencyInstance: AgencyInstance! # address
+  appImplementation: Bytes! # address
+  appInstance: AppInstance!
+  tokenId: DotAgency! # uint256
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+}
+
+type AppInstance @entity {
+  id: ID!
+  name: String!
+  totalSupply: BigInt!
+  address: Bytes!
+}
+
+type Agent @entity {
+  id: ID!
+  name: String!
+  tokenId: BigInt!
+  appInstance: AppInstance!
+  agencyInstance: AgencyInstance!
+  holder: Holder!
+  stakeState: Int!
+  erc6551: Bytes!
+  node: Node!
+  agentActivity: [AgentActivity!] @derivedFrom(field: "agent")
+}
+
+type Holder @entity {
+  id: ID!
+  address: Bytes!
+  dotAgencyTokens: [DotAgency!] @derivedFrom(field: "holder")
+  agentTokens: [Agent!] @derivedFrom(field: "holder")
+  premiumDAO: [PremiumDAO!] @derivedFrom(field: "holder")
+  lp: [LP!] @derivedFrom(field: "holder")
+}
+
+type DotAgency @entity {
+  id: ID!
+  tokenId: BigInt! # uint256
+  name: String!
+  holder: Holder!
+  mintPrice: BigInt!
+  erc6551: Bytes!
+  timestap: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  node: Node!
+  deployV2: [DeployV2!] @derivedFrom(field: "tokenId")
+}
+
+type PremiumDAO @entity {
+  id: ID!
+  tokenId: BigInt! # uint256
+  holder: Holder!
+  erc6551: Bytes!
+  transactionHash: Bytes!
+}
+
+type LP @entity {
+  id: ID!
+  holder: Holder!
+  amount: BigInt!
+  rewardDebt: BigInt!
+  rewardToken: Currency!
+}
+
+type AgencyInstance @entity {
+  id: ID!
+  currency: Currency!
+  mintFeePercent: Int!
+  burnFeePercent: Int!
+  tvl: BigInt!
+  swap: BigInt!
+  fee: BigInt!
+  feeCount: BigInt!
+  #  10 ** 12
+  perTokenReward: BigInt!
+}
+
+type Currency @entity {
+  id: ID!
+  symbol: String!
+  decimals: Int!
+}
+
+type StakeInfoL2 @entity {
+  id: ID!
+  tvl: BigInt!
+  points: BigInt!
+  lastRewardBlock: BigInt!
+  accTokenPerShare: BigInt!
+  rewardDebt: BigInt!
+  tokenPerBlock: BigInt!
+  unspentRewards: BigInt!
+  endBlockOfEpoch: BigInt!
+  type: Int!
+  rewardToken: Currency!
+  requestedCurrency: Currency!
+}
+
+type AgentActivity @entity {
+  id: ID!
+  agent: Agent!
+  type: String!
+  fee: BigInt!
+  swap: BigInt!
+  timestap: BigInt!
+  blockNumber: BigInt!
+  transactionHash: Bytes!
+  to: Bytes!
+}
+
+type Erc6551 @entity {
+  id: ID!
+  account: Bytes!
+  tokenId: BigInt!
+  chainId: BigInt!
+  contractAddress: Bytes!
+  implementation: Bytes!
+  salt: Bytes!
+  transactionHash: Bytes!
+  executes: [Execute!] @derivedFrom(field: "erc6551")
+}
+
+type Execute @entity {
+  id: ID!
+  target: Bytes!
+  value: BigInt!
+  data: Bytes!
+  operation: Int!
+  transactionHash: Bytes!
+  erc6551: Erc6551!
+}
+
+type Node @entity {
+  id: ID!
+  resolver: Resolver!
+  bonds: [Bond!] @derivedFrom(field: "node")
+}
+
+type Resolver @entity {
+  id: ID!
+  node: [Node!] @derivedFrom(field: "resolver")
+  bonds: [Bond!] @derivedFrom(field: "resolver")
+}
+
+type Bond @entity {
+  id: ID!
+  resolver: Resolver!
+  key: String!
+  value: String!
+  node: Node!
+  version: BigInt!
+}

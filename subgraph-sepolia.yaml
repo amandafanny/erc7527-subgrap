@@ -1,0 +1,258 @@
+specVersion: 1.1.0
+description: Erc7527
+repository: https://github.com/amandafanny/erc7527-subgraph.git
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: Factory
+    network: sepolia
+    source:
+      address: "0x1e5e8eAA1507097A88ee342DF5CC754A8AbEc54e"
+      abi: Factory
+      startBlock: 6194794
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - DeployV2
+        - DotAgency
+        - AgencyInstance
+        - Currency
+        - AppInstance
+      abis:
+        - name: Factory
+          file: ./abis/Factory.json
+        - name: Agency
+          file: ./abis/Agency.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Agent
+          file: ./abis/Agent.json
+      eventHandlers:
+        - event: Deploy(address,indexed address,address,indexed address,indexed uint256)
+          handler: handleDeploy
+      file: ./src/factory.ts
+  - kind: ethereum
+    name: DotAgency
+    network: sepolia
+    source:
+      address: "0x6c0f185803a21e7366569c93799782Cc4Ed26869"
+      abi: DotAgency
+      startBlock: 6194521
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - DotAgency
+        - Erc6551
+        - Holder
+      abis:
+        - name: DotAgency
+          file: ./abis/DotAgency.json
+      eventHandlers:
+        - event: Mint(indexed address,indexed uint256,indexed string,uint256)
+          handler: handleMint
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: NewResolver(indexed bytes32,address)
+          handler: handleNewResolver
+        - event:
+            ERC6551AccountCreated(address,indexed address,bytes32,uint256,indexed
+            address,indexed uint256)
+          handler: handleERC6551AccountCreated
+      file: ./src/dot-agency.ts
+  - kind: ethereum
+    name: LPStaking
+    network: sepolia
+    source:
+      address: "0xd2f1b00aFb25d00BE2bdB48EadF2918Bb83aF82F"
+      abi: LPStaking
+      startBlock: 6190866
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Currency
+      abis:
+        - name: LPStaking
+          file: ./abis/LPStaking.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Deposit(indexed address,uint256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,uint256)
+          handler: handleWithdraw
+      file: ./src/lp-staking.ts
+  - kind: ethereum
+    name: DoubleLayerStaking
+    network: sepolia
+    source:
+      address: "0xd02B90B84eA26BAA805c4005Bce35A98a16e50c1"
+      abi: DoubleLayerStaking
+      startBlock: 6194857
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - StakeInfoL2
+        - Agent
+        - Currency
+      abis:
+        - name: DoubleLayerStaking
+          file: ./abis/DoubleLayerStaking.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Stake(indexed address,indexed address,uint256)
+          handler: handleStake
+        - event: Unstake(indexed address,indexed address,uint256)
+          handler: handleUnStake
+      file: ./src/staking.ts
+  - kind: ethereum
+    name: PremiumDAO
+    network: sepolia
+    source:
+      address: "0x3D81Bd7790897A4819614ac3898337Fd1417DdDF"
+      abi: PremiumDAO
+      startBlock: 6190861
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - PremiumDAO
+        - Erc6551
+        - Holder
+      abis:
+        - name: PremiumDAO
+          file: ./abis/PremiumDAO.json
+      eventHandlers:
+        - event:
+            ERC6551AccountCreated(address,indexed address,bytes32,uint256,indexed
+            address,indexed uint256)
+          handler: handleERC6551AccountCreated
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/premium-dao.ts
+  - kind: ethereum
+    name: PublicResolver
+    network: sepolia
+    source:
+      address: "0x63d343c6f9fA2E3dD3840B9eDfCE30bC867Dc890"
+      abi: PublicResolver
+      startBlock: 6195781
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Execute
+      abis:
+        - name: PublicResolver
+          file: ./abis/PublicResolver.json
+      eventHandlers:
+        - event: TextChanged(indexed bytes32,indexed string,string,string)
+          handler: handleTextChanged
+      file: ./src/public-resolver.ts
+  # - kind: ethereum
+  #   name: DotAgencyResolver
+  #   network: sepolia
+  #   source:
+  #     address: "0x6aCca1410C16FfDD60866be84b541492C2398C4e"
+  #     abi: PublicResolver
+  #     startBlock: 5939536
+  #   mapping:
+  #     kind: ethereum/events
+  #     apiVersion: 0.0.9
+  #     language: wasm/assemblyscript
+  #     entities:
+  #       - Bond
+  #     abis:
+  #       - name: PublicResolver
+  #         file: ./abis/PublicResolver.json
+  #     eventHandlers:
+  #       - event: TextChanged(indexed bytes32,indexed string,string,string)
+  #         handler: handleTextChanged
+  #     file: ./src/public-resolver.ts
+templates:
+  - name: Agent
+    kind: ethereum/contract
+    network: sepolia
+    source:
+      abi: Agent
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Agent
+        - Erc6551
+        - Holder
+        - AgencyInstance
+        - Currency
+        - AppInstance
+      abis:
+        - name: Agent
+          file: ./abis/Agent.json
+        - name: Agency
+          file: ./abis/Agency.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+        - event: NewResolver(indexed bytes32,address)
+          handler: handleNewResolver
+        - event:
+            ERC6551AccountCreated(address,indexed address,bytes32,uint256,indexed
+            address,indexed uint256)
+          handler: handleERC6551AccountCreated
+      file: ./src/agent.ts
+  - name: Agency
+    kind: ethereum/contract
+    network: sepolia
+    source:
+      abi: Agency
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - AgencyInstance
+        - Agent
+        - AgentActivity
+      abis:
+        - name: Agency
+          file: ./abis/Agency.json
+        - name: Agent
+          file: ./abis/Agent.json
+      eventHandlers:
+        - event: Wrap(indexed address,indexed uint256,uint256,uint256)
+          handler: handleWrap
+        - event: Unwrap(indexed address,indexed uint256,uint256,uint256)
+          handler: handleUnwrap
+      file: ./src/agency.ts
+  - name: Erc6551
+    kind: ethereum/contract
+    network: sepolia
+    source:
+      abi: Erc6551
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - Execute
+      abis:
+        - name: Erc6551
+          file: ./abis/Erc6551.json
+      callHandlers:
+        - function: execute(address,uint256,bytes,uint8)
+          handler: handleExecute
+      file: ./src/erc6551.ts

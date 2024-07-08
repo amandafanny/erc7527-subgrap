@@ -1,0 +1,22 @@
+{
+  "name": "erc7527",
+  "license": "UNLICENSED",
+  "scripts": {
+    "codegen": "graph codegen subgraph-sepolia.yaml",
+    "gen": "node scripts/generate.js",
+    "build": "graph build subgraph-sepolia.yaml",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ erc7527 subgraph-sepolia.yaml",
+    "create-local": "graph create --node http://localhost:8020/ erc7527",
+    "remove-local": "graph remove --node http://localhost:8020/ erc7527",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 erc7527",
+    "test": "graph test",
+    "deploy-mainnet": "graph deploy --node https://api.studio.thegraph.com/deploy/ erc7527-eth  subgraph-mainnet.yaml"
+  },
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.72.2",
+    "@graphprotocol/graph-ts": "^0.35.1"
+  },
+  "devDependencies": {
+    "matchstick-as": "^0.6.0"
+  }
+}
