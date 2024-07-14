@@ -1,9 +1,16 @@
 node_modules
 
 tests/.bin
+tests/.docker
+
+service
 
 build
 
 scripts
 
 generated
+
+service
+
+readme.md

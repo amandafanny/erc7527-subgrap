@@ -36,6 +36,11 @@
         "name": "erc6551AccountImp_",
         "type": "address",
         "internalType": "address"
+      },
+      {
+        "name": "pushWhitelist_",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "nonpayable"
@@ -43,6 +48,25 @@
   {
     "type": "receive",
     "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "_getPrice",
+    "inputs": [
+      {
+        "name": "app",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "currentPrice",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -252,7 +276,7 @@
     "name": "getUnwrapOracle",
     "inputs": [
       {
-        "name": "data",
+        "name": "",
         "type": "bytes",
         "internalType": "bytes"
       }
@@ -269,14 +293,14 @@
         "internalType": "uint256"
       }
     ],
-    "stateMutability": "pure"
+    "stateMutability": "view"
   },
   {
     "type": "function",
     "name": "getWrapOracle",
     "inputs": [
       {
-        "name": "data",
+        "name": "",
         "type": "bytes",
         "internalType": "bytes"
       }
@@ -293,6 +317,13 @@
         "internalType": "uint256"
       }
     ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "iconstructor",
+    "inputs": [],
+    "outputs": [],
     "stateMutability": "pure"
   },
   {
@@ -369,6 +400,32 @@
   },
   {
     "type": "function",
+    "name": "isRenounceForceApprove",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isRenounceForceCancel",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "perTokenReward",
     "inputs": [],
     "outputs": [
@@ -395,8 +452,47 @@
   },
   {
     "type": "function",
+    "name": "pushWhitelist",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "rebase",
     "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceForceApprove",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceForceCancel",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
     "outputs": [],
     "stateMutability": "nonpayable"
   },
@@ -602,6 +698,18 @@
   },
   {
     "type": "event",
+    "name": "RenounceForceApprove",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RenounceForceCancel",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "Unwrap",
     "inputs": [
       {
@@ -617,7 +725,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "price",
+        "name": "premium",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -648,7 +756,7 @@
         "internalType": "uint256"
       },
       {
-        "name": "price",
+        "name": "premium",
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
@@ -686,19 +794,34 @@
   },
   {
     "type": "error",
+    "name": "ERC7615PushTragetInvalid",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "FailedInnerCall",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "InvalidPullTarget",
-    "inputs": [
-      {
-        "name": "target",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
+    "name": "ForceApproveRenounced",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ForceCancelRenounced",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "MustRenounce",
+    "inputs": []
   },
   {
     "type": "error",
@@ -739,7 +862,39 @@
   },
   {
     "type": "error",
-    "name": "WrapV1LinearExceededSlippagePrice",
+    "name": "TokenIdNotMatch",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "WrapV2AuctionBasePremiumNotZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "WrapV2AutionCallerNotApp",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "WrapV2AutionExceededSlippagePrice",
     "inputs": [
       {
         "name": "required",
@@ -755,7 +910,7 @@
   },
   {
     "type": "error",
-    "name": "WrapV1LinearInsufficientFunds",
+    "name": "WrapV2AutionInsufficientFunds",
     "inputs": [
       {
         "name": "expectation",
@@ -771,23 +926,7 @@
   },
   {
     "type": "error",
-    "name": "WrapV1LinearLessThanMinimumValue",
-    "inputs": [
-      {
-        "name": "required",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "available",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "WrapV1LinearNotOwnerAndNotApproved",
+    "name": "WrapV2AutionNotOwnerAndNotApproved",
     "inputs": [
       {
         "name": "",
@@ -798,7 +937,7 @@
   },
   {
     "type": "error",
-    "name": "WrapV1LinearNotOwnerOfApp",
+    "name": "WrapV2AutionNotOwnerOfApp",
     "inputs": [
       {
         "name": "",
@@ -809,7 +948,7 @@
   },
   {
     "type": "error",
-    "name": "WrapV1LinearNotOwnerOfDotAgency",
+    "name": "WrapV2AutionNotOwnerOfDotAgency",
     "inputs": [
       {
         "name": "",

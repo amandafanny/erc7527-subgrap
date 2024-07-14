@@ -4,65 +4,54 @@ import {
   test,
   clearStore,
   beforeAll,
-  afterAll
-} from "matchstick-as/assembly/index"
-import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { ApprovalForAll } from "../generated/schema"
-import { ApprovalForAll as ApprovalForAllEvent } from "../generated/Factory/Factory"
-import { handleApprovalForAll } from "../src/factory"
-import { createApprovalForAllEvent } from "./factory-utils"
+  afterAll,
+} from "matchstick-as/assembly/index";
+import {
+  Address,
+  BigInt,
+  ByteArray,
+  Bytes,
+  ethereum,
+  log,
+} from "@graphprotocol/graph-ts";
+import { addressZero } from "../src";
+// import { ApprovalForAll } from "../generated/schema"
+// import { ApprovalForAll as ApprovalForAllEvent } from "../generated/Factory/Factory"
+// import { handleApprovalForAll } from "../src/factory"
 
 // Tests structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
 describe("Describe entity assertions", () => {
-  beforeAll(() => {
-    let account = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let operator = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let approved = "boolean Not implemented"
-    let newApprovalForAllEvent = createApprovalForAllEvent(
-      account,
-      operator,
-      approved
-    )
-    handleApprovalForAll(newApprovalForAllEvent)
-  })
+  beforeAll(() => {});
 
   afterAll(() => {
-    clearStore()
-  })
+    clearStore();
+  });
 
-  // For more test scenarios, see:
-  // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
+  test("Address equal", () => {
+    assert.booleanEquals(
+      ByteArray.fromHexString(addressZero.toHexString()).equals(addressZero),
+      true
+    );
+  });
+  test("Bytes equal", () => {
+    assert.booleanEquals(
+      ByteArray.fromHexString(
+        Bytes.fromHexString("0x3c6e2f22").toHexString()
+      ) == Bytes.fromHexString("0x3c6e2f22"),
+      true
+    );
+  });
 
-  test("ApprovalForAll created and stored", () => {
-    assert.entityCount("ApprovalForAll", 1)
+  test("Bytes not equal", () => {
+    assert.booleanEquals(
+      Bytes.fromHexString("0x3c6e2f22") != Bytes.fromHexString("0x3c6e2f22"),
+      false
+    );
+  });
 
-    // 0xa16081f360e3847006db660bae1c6d1b2e17ec2a is the default address used in newMockEvent() function
-    assert.fieldEquals(
-      "ApprovalForAll",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "account",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ApprovalForAll",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "operator",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "ApprovalForAll",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a-1",
-      "approved",
-      "boolean Not implemented"
-    )
-
-    // More assert options:
-    // https://thegraph.com/docs/en/developer/matchstick/#asserts
-  })
-})
+  test("BigInt equal", () => {
+    assert.booleanEquals(new BigInt(0).equals(new BigInt(0)), true);
+  });
+});

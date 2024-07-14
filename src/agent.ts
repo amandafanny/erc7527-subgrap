@@ -7,12 +7,15 @@ import {
 import { Agent, Erc6551, Node, Resolver } from "../generated/schema";
 import {
   Address,
+  ByteArray,
+  Bytes,
   DataSourceContext,
   dataSource,
   log,
 } from "@graphprotocol/graph-ts";
 import { Erc6551 as Erc6551Contract } from "../generated/templates";
 import { addressZero, setAppInstance, setHolder } from ".";
+import { setErc6551Zero } from "./erc6551";
 
 export function handleTransfer(event: TransferEvent): void {
   const context = dataSource.context();
@@ -21,40 +24,50 @@ export function handleTransfer(event: TransferEvent): void {
   const from = event.params.from;
   const holder = event.params.to;
   const appInstance = context.getString("appInstance");
+  const appImplementation = context.getString("appImplementation");
   const agencyInstance = context.getString("agencyInstance");
+  const agencyImplementation = context.getString("agencyImplementation");
 
   const holderEntity = setHolder(holder);
 
-  const agentEntityId = appInstance.concat("-").concat(tokenId.toString());
+  const agentEntityId = Bytes.fromUTF8(
+    appInstance.concat("-").concat(tokenId.toString())
+  );
 
   let agentEntity = Agent.load(agentEntityId);
 
+  const appInstanceAddress = Address.fromString(appInstance);
   if (agentEntity === null) {
     agentEntity = new Agent(agentEntityId);
-    const agentContract = AgentContract.bind(Address.fromString(appInstance));
+    const agentContract = AgentContract.bind(appInstanceAddress);
     const name = agentContract.getName1(tokenId);
     const node = agentContract.getNode(tokenId);
 
     const resolver = agentContract.getResolver(node);
 
-    const nodeEntity = new Node(node.toHexString());
-    const resolverEntity = new Resolver(resolver.toHexString());
+    const nodeEntity = new Node(node);
+    const resolverEntity = new Resolver(resolver);
     resolverEntity.save();
     nodeEntity.resolver = resolverEntity.id;
     nodeEntity.save();
 
-    const appInstancEntity = setAppInstance(appInstance, true);
+    const appInstancEntity = setAppInstance(appInstanceAddress, true);
 
     agentEntity.tokenId = tokenId;
     agentEntity.name = name;
     agentEntity.appInstance = appInstancEntity.id;
-    agentEntity.agencyInstance = agencyInstance;
+    agentEntity.agencyInstance = Address.fromString(agencyInstance);
+    agentEntity.appImplementation = Address.fromString(appImplementation);
+    agentEntity.agencyImplementation = Address.fromString(agencyImplementation);
     agentEntity.holder = holderEntity.id;
     agentEntity.stakeState = 0;
-    agentEntity.erc6551 = addressZero;
+
+    agentEntity.erc6551 = setErc6551Zero().id;
     agentEntity.node = nodeEntity.id;
-  } else if (holder.toHexString() == addressZero.toHexString()) {
-    setAppInstance(appInstance, true);
+  } else if (
+    ByteArray.fromHexString(holder.toHexString()).equals(addressZero)
+  ) {
+    setAppInstance(appInstanceAddress, true);
   }
   agentEntity.holder = holderEntity.id;
 
@@ -72,10 +85,12 @@ export function handleERC6551AccountCreated(
   const salt = event.params.salt;
 
   const agentEntity = Agent.load(
-    dataSource.address().toHexString().concat("-").concat(tokenId.toString())
+    Bytes.fromUTF8(
+      dataSource.address().toHexString().concat("-").concat(tokenId.toString())
+    )
   );
 
-  const erc6551Entity = new Erc6551(erc6551.toHexString());
+  const erc6551Entity = new Erc6551(erc6551);
   erc6551Entity.account = erc6551;
   erc6551Entity.contractAddress = tokenContract;
   erc6551Entity.tokenId = tokenId;
@@ -83,6 +98,7 @@ export function handleERC6551AccountCreated(
   erc6551Entity.implementation = implementation;
   erc6551Entity.salt = salt;
   erc6551Entity.transactionHash = event.transaction.hash;
+  erc6551Entity.blockNumber = event.block.number;
   erc6551Entity.save();
 
   if (agentEntity !== null) {
@@ -93,7 +109,7 @@ export function handleERC6551AccountCreated(
   const context = new DataSourceContext();
   context.setString("contractAddress", tokenContract.toHexString());
   context.setString("tokenId", tokenId.toString());
-  context.setString("erc6551Entity", erc6551Entity.id);
+  context.setString("erc6551Entity", erc6551Entity.id.toHexString());
 
   Erc6551Contract.createWithContext(erc6551, context);
 }
@@ -102,14 +118,14 @@ export function handleNewResolver(event: NewResolverEvent): void {
   const node = event.params.node;
   const resolver = event.params.resolver;
 
-  let nodeEntity = Node.load(node.toHexString());
-  let resolverEntity = Resolver.load(resolver.toHexString());
+  let nodeEntity = Node.load(node);
+  let resolverEntity = Resolver.load(resolver);
 
   if (resolverEntity === null) {
-    resolverEntity = new Resolver(resolver.toHexString());
+    resolverEntity = new Resolver(resolver);
   }
   if (nodeEntity === null) {
-    nodeEntity = new Node(node.toHexString());
+    nodeEntity = new Node(node);
   }
   nodeEntity.resolver = resolverEntity.id;
   resolverEntity.save();

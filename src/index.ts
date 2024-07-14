@@ -1,4 +1,4 @@
-import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts";
+import { Address, BigInt, ByteArray, Bytes } from "@graphprotocol/graph-ts";
 import {
   AgencyInstance,
   AppInstance,
@@ -14,28 +14,27 @@ export const addressZero = Address.fromString(
 );
 
 export const setHolder = (holder: Bytes): Holder => {
-  const id = holder.toHexString();
-  let appInstanceEntity = Holder.load(id);
-  if (appInstanceEntity === null) {
-    appInstanceEntity = new Holder(id);
-    appInstanceEntity.address = holder;
-    appInstanceEntity.save();
+  let holderEntity = Holder.load(holder);
+  if (holderEntity === null) {
+    holderEntity = new Holder(holder);
+    holderEntity.address = holder;
+    holderEntity.save();
   }
 
-  return appInstanceEntity;
+  return holderEntity;
 };
 
 export const setAppInstance = (
-  appInstance: string,
+  appInstance: Address,
   update: bool
 ): AppInstance => {
   let appInstanceEntity = AppInstance.load(appInstance);
-  const appInstanceAddress = Address.fromString(appInstance);
-  const agentContract = Agent.bind(appInstanceAddress);
+
+  const agentContract = Agent.bind(appInstance);
 
   if (appInstanceEntity === null) {
     appInstanceEntity = new AppInstance(appInstance);
-    appInstanceEntity.address = appInstanceAddress;
+    appInstanceEntity.address = appInstance;
     const name = agentContract.try_name();
     appInstanceEntity.totalSupply = new BigInt(0);
     if (name.reverted) {
@@ -44,7 +43,6 @@ export const setAppInstance = (
       appInstanceEntity.name = name.value;
     }
   }
-  // update totalSupply
   if (update) {
     const totalSupply = agentContract.try_totalSupply();
     if (!totalSupply.reverted) {
@@ -56,20 +54,19 @@ export const setAppInstance = (
   return appInstanceEntity;
 };
 
-export const setCurrency = (currency: string): Currency => {
+export const setCurrency = (currency: Address): Currency => {
   let currencyEntity = Currency.load(currency);
   if (currencyEntity === null) {
     currencyEntity = new Currency(currency);
 
-    if (currency == addressZero.toHexString()) {
+    if (ByteArray.fromHexString(currency.toHexString()).equals(addressZero)) {
       currencyEntity.decimals = 18;
       currencyEntity.symbol = "ETH";
       currencyEntity.save();
       return currencyEntity;
     }
 
-    const currencyAddress = Address.fromString(currency);
-    const currencyContract = ERC20.bind(currencyAddress);
+    const currencyContract = ERC20.bind(currency);
 
     const decimals = currencyContract.try_decimals();
     const symbol = currencyContract.try_symbol();
@@ -92,37 +89,35 @@ export const setCurrency = (currency: string): Currency => {
   return currencyEntity;
 };
 
-export const setAgencyInstance = (agencyInstance: string): AgencyInstance => {
+export const setAgencyInstance = (agencyInstance: Address): AgencyInstance => {
   let agencyInstanceEntity = AgencyInstance.load(agencyInstance);
   if (agencyInstanceEntity === null) {
     agencyInstanceEntity = new AgencyInstance(agencyInstance);
-  } else {
-    return agencyInstanceEntity;
+    agencyInstanceEntity.isRenounceForceApprove = false;
+    agencyInstanceEntity.isRenounceForceCancel = false;
+    const agencyContract = Agency.bind(agencyInstance);
+    const strategy = agencyContract.try_getStrategy();
+
+    if (strategy.reverted) {
+      const currencyEntity = setCurrency(addressZero);
+      agencyInstanceEntity.currency = currencyEntity.id;
+      agencyInstanceEntity.mintFeePercent = 0;
+      agencyInstanceEntity.burnFeePercent = 0;
+    } else {
+      const asset = strategy.value.getAsset();
+      const currencyEntity = setCurrency(asset.currency);
+      agencyInstanceEntity.currency = currencyEntity.id;
+      agencyInstanceEntity.mintFeePercent = asset.mintFeePercent;
+      agencyInstanceEntity.burnFeePercent = asset.burnFeePercent;
+    }
+
+    agencyInstanceEntity.tvl = new BigInt(0);
+    agencyInstanceEntity.fee = new BigInt(0);
+    agencyInstanceEntity.swap = new BigInt(0);
+    agencyInstanceEntity.feeCount = new BigInt(0);
+    agencyInstanceEntity.perTokenReward = new BigInt(0);
+
+    agencyInstanceEntity.save();
   }
-
-  const appInstanceAddress = Address.fromString(agencyInstance);
-  const agencyContract = Agency.bind(appInstanceAddress);
-  const strategy = agencyContract.try_getStrategy();
-
-  if (strategy.reverted) {
-    const currencyEntity = setCurrency(addressZero.toHexString());
-    agencyInstanceEntity.currency = currencyEntity.id;
-    agencyInstanceEntity.mintFeePercent = 0;
-    agencyInstanceEntity.burnFeePercent = 0;
-  } else {
-    const asset = strategy.value.getAsset();
-    const currencyEntity = setCurrency(asset.currency.toHexString());
-    agencyInstanceEntity.currency = currencyEntity.id;
-    agencyInstanceEntity.mintFeePercent = asset.mintFeePercent;
-    agencyInstanceEntity.burnFeePercent = asset.burnFeePercent;
-  }
-
-  agencyInstanceEntity.tvl = new BigInt(0);
-  agencyInstanceEntity.fee = new BigInt(0);
-  agencyInstanceEntity.swap = new BigInt(0);
-  agencyInstanceEntity.feeCount = new BigInt(0);
-  agencyInstanceEntity.perTokenReward = new BigInt(0);
-
-  agencyInstanceEntity.save();
   return agencyInstanceEntity;
 };

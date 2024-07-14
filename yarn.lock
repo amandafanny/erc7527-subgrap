@@ -219,10 +219,10 @@
     graphql-import-node "^0.0.5"
     js-yaml "^4.1.0"
 
-"@graphprotocol/graph-cli@^0.72.2":
-  version "0.72.2"
-  resolved "https://r.cnpmjs.org/@graphprotocol/graph-cli/-/graph-cli-0.72.2.tgz"
-  integrity sha512-JuFFnir8dmfjDM3f8IaJBVZ5M4xf6TTOqj0uDSQZYlVeA6KPMqL3VrD5ogq1UADDB52BRPYULXjxyO01AF3lyw==
+"@graphprotocol/graph-cli@^0.78.0":
+  version "0.78.0"
+  resolved "https://r.cnpmjs.org/@graphprotocol/graph-cli/-/graph-cli-0.78.0.tgz"
+  integrity sha512-Zw/6k7YYjVoHFgy1BbqpllPUSjzk1ubkIBbYp7HlD//mPUnUhWQLgId92yENw1DqbWOx1R+LhXjeKkwbJgjUxA==
   dependencies:
     "@float-capital/float-subgraph-uncrashable" "^0.0.0-alpha.4"
     "@oclif/core" "2.8.6"
@@ -244,6 +244,7 @@
     ipfs-http-client "55.0.0"
     jayson "4.0.0"
     js-yaml "3.14.1"
+    open "8.4.2"
     prettier "3.0.3"
     semver "7.4.0"
     sync-request "6.1.0"
@@ -1273,6 +1274,11 @@ define-data-property@^1.1.4:
     es-errors "^1.3.0"
     gopd "^1.0.1"
 
+define-lazy-prop@^2.0.0:
+  version "2.0.0"
+  resolved "https://r2.cnpmjs.org/define-lazy-prop/-/define-lazy-prop-2.0.0.tgz"
+  integrity sha512-Ds09qNh8yw3khSjiJjiUInaGX9xlqZDY7JVryGxdxV7NPeuqQfplOpQ66yJFZut3jLa5zOwkXw1g9EI2uKh4Og==
+
 delay@^5.0.0:
   version "5.0.0"
   resolved "https://r2.cnpmjs.org/delay/-/delay-5.0.0.tgz"
@@ -2039,7 +2045,7 @@ is-binary-path@~2.1.0:
   dependencies:
     binary-extensions "^2.0.0"
 
-is-docker@^2.0.0:
+is-docker@^2.0.0, is-docker@^2.1.1:
   version "2.2.1"
   resolved "https://r2.cnpmjs.org/is-docker/-/is-docker-2.2.1.tgz"
   integrity sha512-F+i2BKsFrH66iaUFc0woD8sLy8getkwTwtOBjvs56Cx4CgJDeKQeqfz8wAYiSb8JOprWhHH5p77PbmYCvvUuXQ==
@@ -2655,6 +2661,15 @@ onetime@^5.1.0, onetime@^5.1.2:
   integrity sha512-kbpaSSGJTWdAY5KPVeMOKXSrPtr8C8C7wodJbcsd51jRnmD+GZu8Y0VoU6Dm5Z4vWr0Ig/1NKuWRKf7j5aaYSg==
   dependencies:
     mimic-fn "^2.1.0"
+
+open@8.4.2:
+  version "8.4.2"
+  resolved "https://r.cnpmjs.org/open/-/open-8.4.2.tgz"
+  integrity sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==
+  dependencies:
+    define-lazy-prop "^2.0.0"
+    is-docker "^2.1.1"
+    is-wsl "^2.2.0"
 
 ora@4.0.2:
   version "4.0.2"

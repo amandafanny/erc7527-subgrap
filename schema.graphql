@@ -1,5 +1,5 @@
 type DeployV2 @entity(immutable: true) {
-  id: ID!
+  id: Bytes!
   agencyImplementation: Bytes! # address
   agencyInstance: AgencyInstance! # address
   appImplementation: Bytes! # address
@@ -10,41 +10,45 @@ type DeployV2 @entity(immutable: true) {
 }
 
 type AppInstance @entity {
-  id: ID!
+  id: Bytes!
   name: String!
   totalSupply: BigInt!
   address: Bytes!
+  doubleLayerStakingL2: DoubleLayerStakingL2
 }
 
 type Agent @entity {
-  id: ID!
+  id: Bytes!
   name: String!
   tokenId: BigInt!
+  appImplementation: Bytes!
   appInstance: AppInstance!
+  agencyImplementation: Bytes!
   agencyInstance: AgencyInstance!
   holder: Holder!
   stakeState: Int!
-  erc6551: Bytes!
+  erc6551: Erc6551!
   node: Node!
   agentActivity: [AgentActivity!] @derivedFrom(field: "agent")
+  doubleLayerStakingL2TokenIdRewardDebt: DoubleLayerStakingL2TokenIdRewardDebt
 }
 
 type Holder @entity {
-  id: ID!
+  id: Bytes!
   address: Bytes!
   dotAgencyTokens: [DotAgency!] @derivedFrom(field: "holder")
   agentTokens: [Agent!] @derivedFrom(field: "holder")
   premiumDAO: [PremiumDAO!] @derivedFrom(field: "holder")
-  lp: [LP!] @derivedFrom(field: "holder")
+  lp: LP
 }
 
 type DotAgency @entity {
-  id: ID!
+  id: Bytes!
   tokenId: BigInt! # uint256
   name: String!
   holder: Holder!
   mintPrice: BigInt!
-  erc6551: Bytes!
+  erc6551: Erc6551!
   timestap: BigInt!
   blockNumber: BigInt!
   transactionHash: Bytes!
@@ -53,15 +57,15 @@ type DotAgency @entity {
 }
 
 type PremiumDAO @entity {
-  id: ID!
+  id: Bytes!
   tokenId: BigInt! # uint256
   holder: Holder!
-  erc6551: Bytes!
+  erc6551: Erc6551!
   transactionHash: Bytes!
 }
 
 type LP @entity {
-  id: ID!
+  id: Bytes!
   holder: Holder!
   amount: BigInt!
   rewardDebt: BigInt!
@@ -69,7 +73,7 @@ type LP @entity {
 }
 
 type AgencyInstance @entity {
-  id: ID!
+  id: Bytes!
   currency: Currency!
   mintFeePercent: Int!
   burnFeePercent: Int!
@@ -79,16 +83,40 @@ type AgencyInstance @entity {
   feeCount: BigInt!
   #  10 ** 12
   perTokenReward: BigInt!
+  isRenounceForceApprove: Boolean!
+  isRenounceForceCancel: Boolean!
+  agencyApprove: [AgencyApprove!] @derivedFrom(field: "address")
 }
 
-type Currency @entity {
-  id: ID!
+type AgencyApprove @entity {
+  id: Bytes!
+  address: AgencyInstance!
+  target: Bytes!
+  selector: Bytes!
+  value: Boolean!
+}
+
+type Currency @entity(immutable: true) {
+  id: Bytes!
   symbol: String!
   decimals: Int!
 }
 
-type StakeInfoL2 @entity {
-  id: ID!
+type DoubleLayerCreatorAccount @entity {
+  id: Bytes!
+  account: Bytes!
+  claim: BigInt!
+}
+
+type DoubleLayerDotAgency @entity {
+  id: Bytes!
+  tokenId: BigInt!
+  claim: BigInt!
+}
+
+type DoubleLayerStakingL2 @entity {
+  id: Bytes!
+  appInstance: AppInstance!
   tvl: BigInt!
   points: BigInt!
   lastRewardBlock: BigInt!
@@ -97,13 +125,21 @@ type StakeInfoL2 @entity {
   tokenPerBlock: BigInt!
   unspentRewards: BigInt!
   endBlockOfEpoch: BigInt!
-  type: Int!
+  currencyType: String!
   rewardToken: Currency!
   requestedCurrency: Currency!
 }
 
-type AgentActivity @entity {
-  id: ID!
+type DoubleLayerStakingL2TokenIdRewardDebt @entity {
+  id: Bytes!
+  contractAddress: Bytes!
+  tokenId: BigInt!
+  rewardDebt: BigInt!
+  agent: Agent!
+}
+
+type AgentActivity @entity(immutable: true) {
+  id: Bytes!
   agent: Agent!
   type: String!
   fee: BigInt!
@@ -114,8 +150,8 @@ type AgentActivity @entity {
   to: Bytes!
 }
 
-type Erc6551 @entity {
-  id: ID!
+type Erc6551 @entity(immutable: true) {
+  id: Bytes!
   account: Bytes!
   tokenId: BigInt!
   chainId: BigInt!
@@ -123,33 +159,35 @@ type Erc6551 @entity {
   implementation: Bytes!
   salt: Bytes!
   transactionHash: Bytes!
+  blockNumber: BigInt!
   executes: [Execute!] @derivedFrom(field: "erc6551")
 }
 
-type Execute @entity {
-  id: ID!
+type Execute @entity(immutable: true) {
+  id: Bytes!
   target: Bytes!
   value: BigInt!
   data: Bytes!
   operation: Int!
   transactionHash: Bytes!
+  blockNumber: BigInt!
   erc6551: Erc6551!
 }
 
 type Node @entity {
-  id: ID!
+  id: Bytes!
   resolver: Resolver!
   bonds: [Bond!] @derivedFrom(field: "node")
 }
 
 type Resolver @entity {
-  id: ID!
+  id: Bytes!
   node: [Node!] @derivedFrom(field: "resolver")
   bonds: [Bond!] @derivedFrom(field: "resolver")
 }
 
 type Bond @entity {
-  id: ID!
+  id: Bytes!
   resolver: Resolver!
   key: String!
   value: String!
