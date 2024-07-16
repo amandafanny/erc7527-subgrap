@@ -106,6 +106,9 @@ dataSources:
         - DoubleLayerStakingL2
         - Agent
         - Currency
+        - DoubleLayerCreatorAccount
+        - DoubleLayerDotAgency
+        - DoubleLayerStakingL2TokenIdRewardDebt
       abis:
         - name: DoubleLayerStaking
           file: ./abis/DoubleLayerStaking.json
@@ -259,6 +262,18 @@ templates:
           handler: handleWrap
         - event: Unwrap(indexed address,indexed uint256,uint256,uint256)
           handler: handleUnwrap
+        # - event: Approve(indexed bytes4,indexed address,bytes)
+        #   handler: handleApprove
+        # - event: Cancel(indexed bytes4,indexed address,bytes)
+        #   handler: handleCancel
+        - event: ForceApprove(indexed bytes4,indexed address)
+          handler: handleForceApprove
+        - event: ForceCancel(indexed bytes4,indexed address)
+          handler: handleForceCancel
+        - event: RenounceForceApprove()
+          handler: handleRenounceForceApprove
+        - event: RenounceForceCancel()
+          handler: handleRenounceForceCancel
       file: ./src/agency.ts
   - name: Erc6551
     kind: ethereum/contract
