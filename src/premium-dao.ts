@@ -5,7 +5,7 @@ import {
   dataSource,
   log,
 } from "@graphprotocol/graph-ts";
-import { addressZero, setHolder } from ".";
+import { setHolder } from ".";
 import {
   ERC6551AccountCreated as ERC6551AccountCreatedEvent,
   Transfer as TransferEvent,

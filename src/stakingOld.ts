@@ -18,16 +18,15 @@ import {
   UpdateRewardL2Call,
   UpdatePoolL2Call,
   UpdateRewardL1Call,
-  ForceUpdateRewardL1Call,
-} from "../generated/DoubleLayerStaking/DoubleLayerStaking";
+} from "../generated/DoubleLayerStakingOld/DoubleLayerStaking";
 import { Agent as AgentContract } from "../generated/templates/Agent/Agent";
 import { Agency } from "../generated/templates/Agency/Agency";
 import {
   Agent,
-  DoubleLayerCreatorAccount,
-  DoubleLayerDotAgency,
-  DoubleLayerStakingL2,
-  DoubleLayerStakingL2TokenIdRewardDebt,
+  DoubleLayerCreatorAccountOld,
+  DoubleLayerDotAgencyOld,
+  DoubleLayerStakingL2Old,
+  DoubleLayerStakingL2TokenIdRewardDebtOld,
 } from "../generated/schema";
 import { addressZero, getAgencyBalance, setCurrency } from ".";
 
@@ -35,7 +34,7 @@ export function setDoubleLayerCreatorAccount(
   doubleLayerStakingContract: DoubleLayerStaking,
   creator: Address
 ): void {
-  const creatorAccountEntity = new DoubleLayerCreatorAccount(creator);
+  const creatorAccountEntity = new DoubleLayerCreatorAccountOld(creator);
   const claim = doubleLayerStakingContract.claimForCreatorAccount(creator);
   creatorAccountEntity.account = creator;
   creatorAccountEntity.claim = claim;
@@ -46,7 +45,7 @@ export function setDoubleLayerDotAgenct(
   doubleLayerStakingContract: DoubleLayerStaking,
   tokenId: BigInt
 ): void {
-  const dotAgencyEntity = new DoubleLayerDotAgency(
+  const dotAgencyEntity = new DoubleLayerDotAgencyOld(
     Bytes.fromByteArray(Bytes.fromBigInt(tokenId))
   );
   const claim = doubleLayerStakingContract.claimForDotAgencyAccount(tokenId);
@@ -59,9 +58,9 @@ export function setDoubleLayerStakingL2Info(
   doubleLayerStakingContract: DoubleLayerStaking,
   nft: Address
 ): void {
-  let l2InfoEntity = DoubleLayerStakingL2.load(nft);
+  let l2InfoEntity = DoubleLayerStakingL2Old.load(nft);
   if (l2InfoEntity === null) {
-    l2InfoEntity = new DoubleLayerStakingL2(nft);
+    l2InfoEntity = new DoubleLayerStakingL2Old(nft);
     l2InfoEntity.appInstance = nft;
   }
 
@@ -110,10 +109,10 @@ export function setDoubleLayerStakingL2TokenIdRewardDebtInfo(
   const entityId = Bytes.fromUTF8(
     nft.toHexString().concat("-").concat(tokenId.toString())
   );
-  let rewardDebtEntity = new DoubleLayerStakingL2TokenIdRewardDebt(entityId);
+  let rewardDebtEntity = new DoubleLayerStakingL2TokenIdRewardDebtOld(entityId);
 
   if (rewardDebtEntity === null) {
-    rewardDebtEntity = new DoubleLayerStakingL2TokenIdRewardDebt(entityId);
+    rewardDebtEntity = new DoubleLayerStakingL2TokenIdRewardDebtOld(entityId);
   }
   const agentEntity = Agent.load(entityId);
 
@@ -138,7 +137,7 @@ export function handleStakeEvent(event: StakeEvent): void {
 
   const contract = DoubleLayerStaking.bind(dataSource.address());
   if (agentEntity) {
-    agentEntity.stakeState = contract.getState(l2, tokenId);
+    agentEntity.stakeStateOld = contract.getState(l2, tokenId);
     agentEntity.save();
   }
 }
@@ -155,7 +154,7 @@ export function handleUnStakeEvent(event: UnstakeEvent): void {
 
   const contract = DoubleLayerStaking.bind(dataSource.address());
   if (agentEntity) {
-    agentEntity.stakeState = contract.getState(l2, tokenId);
+    agentEntity.stakeStateOld = contract.getState(l2, tokenId);
     agentEntity.save();
   }
 }
@@ -259,10 +258,4 @@ export function handleExec(call: ExecCall): void {
     nft,
     tokenId.toTuple()[0].toBigInt()
   );
-}
-
-export function handleForceUpdateRewardL1(call: ForceUpdateRewardL1Call): void {
-  const nft = call.inputs.nft;
-  const stakingContract = DoubleLayerStaking.bind(dataSource.address());
-  setDoubleLayerStakingL2Info(stakingContract, nft);
 }

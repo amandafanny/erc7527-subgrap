@@ -4,17 +4,21 @@ import {
   NewResolver as NewResolverEvent,
   ERC6551AccountCreated as ERC6551AccountCreatedEvent,
 } from "../generated/templates/Agent/Agent";
-import { Agent, Erc6551, Node, Resolver } from "../generated/schema";
+import {
+  Agent,
+  AppInstance,
+  Erc6551,
+  Node,
+  Resolver,
+} from "../generated/schema";
 import {
   Address,
-  ByteArray,
   Bytes,
   DataSourceContext,
   dataSource,
-  log,
 } from "@graphprotocol/graph-ts";
 import { Erc6551 as Erc6551Contract } from "../generated/templates";
-import { addressZero, setAppInstance, setHolder } from ".";
+import { addressZero, setHolder } from ".";
 import { setErc6551Zero } from "./erc6551";
 
 export function handleTransfer(event: TransferEvent): void {
@@ -37,12 +41,13 @@ export function handleTransfer(event: TransferEvent): void {
   let agentEntity = Agent.load(agentEntityId);
 
   const appInstanceAddress = Address.fromString(appInstance);
+  const agentContract = AgentContract.bind(appInstanceAddress);
+
   if (agentEntity === null) {
     agentEntity = new Agent(agentEntityId);
-    const agentContract = AgentContract.bind(appInstanceAddress);
+
     const name = agentContract.getName1(tokenId);
     const node = agentContract.getNode(tokenId);
-
     const resolver = agentContract.getResolver(node);
 
     const nodeEntity = new Node(node);
@@ -51,26 +56,34 @@ export function handleTransfer(event: TransferEvent): void {
     nodeEntity.resolver = resolverEntity.id;
     nodeEntity.save();
 
-    const appInstancEntity = setAppInstance(appInstanceAddress, true);
+    const appInstancEntity = AppInstance.load(appInstanceAddress);
+    const totalSupply = agentContract.try_totalSupply();
+    if (appInstancEntity !== null && !totalSupply.reverted) {
+      appInstancEntity.totalSupply = totalSupply.value;
+      appInstancEntity.save();
+    }
 
     agentEntity.tokenId = tokenId;
     agentEntity.name = name;
-    agentEntity.appInstance = appInstancEntity.id;
+    agentEntity.appInstance = appInstanceAddress;
     agentEntity.agencyInstance = Address.fromString(agencyInstance);
     agentEntity.appImplementation = Address.fromString(appImplementation);
     agentEntity.agencyImplementation = Address.fromString(agencyImplementation);
     agentEntity.holder = holderEntity.id;
     agentEntity.stakeState = 0;
-
+    agentEntity.stakeStateOld = 0;
     agentEntity.erc6551 = setErc6551Zero().id;
     agentEntity.node = nodeEntity.id;
-  } else if (
-    ByteArray.fromHexString(holder.toHexString()).equals(addressZero)
-  ) {
-    setAppInstance(appInstanceAddress, true);
+  } else if (holder.equals(addressZero)) {
+    const appInstancEntity = AppInstance.load(appInstanceAddress);
+    const totalSupply = agentContract.try_totalSupply();
+    if (appInstancEntity !== null && !totalSupply.reverted) {
+      appInstancEntity.totalSupply = totalSupply.value;
+      appInstancEntity.save();
+    }
   }
-  agentEntity.holder = holderEntity.id;
 
+  agentEntity.holder = holderEntity.id;
   agentEntity.save();
 }
 

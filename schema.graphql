@@ -14,7 +14,12 @@ type AppInstance @entity {
   name: String!
   totalSupply: BigInt!
   address: Bytes!
-  doubleLayerStakingL2: DoubleLayerStakingL2
+  doubleLayerStakingL2: DoubleLayerStakingL2 @derivedFrom(field: "appInstance")
+  doubleLayerStakingL2Old: DoubleLayerStakingL2Old
+    @derivedFrom(field: "appInstance")
+  agencyInstance: AgencyInstance! @derivedFrom(field: "appInstance")
+  appImplementation: Bytes!
+  agents: [Agent!] @derivedFrom(field: "appInstance")
 }
 
 type Agent @entity {
@@ -27,10 +32,14 @@ type Agent @entity {
   agencyInstance: AgencyInstance!
   holder: Holder!
   stakeState: Int!
+  stakeStateOld: Int!
   erc6551: Erc6551!
   node: Node!
   agentActivity: [AgentActivity!] @derivedFrom(field: "agent")
   doubleLayerStakingL2TokenIdRewardDebt: DoubleLayerStakingL2TokenIdRewardDebt
+    @derivedFrom(field: "agent")
+  doubleLayerStakingL2TokenIdRewardDebtOld: DoubleLayerStakingL2TokenIdRewardDebtOld
+    @derivedFrom(field: "agent")
 }
 
 type Holder @entity {
@@ -39,7 +48,7 @@ type Holder @entity {
   dotAgencyTokens: [DotAgency!] @derivedFrom(field: "holder")
   agentTokens: [Agent!] @derivedFrom(field: "holder")
   premiumDAO: [PremiumDAO!] @derivedFrom(field: "holder")
-  lp: LP
+  lp: LP @derivedFrom(field: "holder")
 }
 
 type DotAgency @entity {
@@ -53,7 +62,7 @@ type DotAgency @entity {
   blockNumber: BigInt!
   transactionHash: Bytes!
   node: Node!
-  deployV2: [DeployV2!] @derivedFrom(field: "tokenId")
+  deployV2: DeployV2 @derivedFrom(field: "tokenId")
 }
 
 type PremiumDAO @entity {
@@ -74,9 +83,11 @@ type LP @entity {
 
 type AgencyInstance @entity {
   id: Bytes!
+  agencyImplementation: Bytes!
   currency: Currency!
   mintFeePercent: Int!
   burnFeePercent: Int!
+  pureTvl: BigInt!
   tvl: BigInt!
   swap: BigInt!
   fee: BigInt!
@@ -85,6 +96,7 @@ type AgencyInstance @entity {
   perTokenReward: BigInt!
   isRenounceForceApprove: Boolean!
   isRenounceForceCancel: Boolean!
+  appInstance: AppInstance!
   agencyApprove: [AgencyApprove!] @derivedFrom(field: "address")
 }
 
@@ -108,7 +120,19 @@ type DoubleLayerCreatorAccount @entity {
   claim: BigInt!
 }
 
+type DoubleLayerCreatorAccountOld @entity {
+  id: Bytes!
+  account: Bytes!
+  claim: BigInt!
+}
+
 type DoubleLayerDotAgency @entity {
+  id: Bytes!
+  tokenId: BigInt!
+  claim: BigInt!
+}
+
+type DoubleLayerDotAgencyOld @entity {
   id: Bytes!
   tokenId: BigInt!
   claim: BigInt!
@@ -117,7 +141,27 @@ type DoubleLayerDotAgency @entity {
 type DoubleLayerStakingL2 @entity {
   id: Bytes!
   appInstance: AppInstance!
-  tvl: BigInt!
+  stakeTvl: BigInt!
+  agencyTvl: BigInt!
+  diffTvl: BigInt!
+  points: BigInt!
+  lastRewardBlock: BigInt!
+  accTokenPerShare: BigInt!
+  rewardDebt: BigInt!
+  tokenPerBlock: BigInt!
+  unspentRewards: BigInt!
+  endBlockOfEpoch: BigInt!
+  currencyType: String!
+  rewardToken: Currency!
+  requestedCurrency: Currency!
+}
+
+type DoubleLayerStakingL2Old @entity {
+  id: Bytes!
+  appInstance: AppInstance!
+  stakeTvl: BigInt!
+  agencyTvl: BigInt!
+  diffTvl: BigInt!
   points: BigInt!
   lastRewardBlock: BigInt!
   accTokenPerShare: BigInt!
@@ -131,6 +175,14 @@ type DoubleLayerStakingL2 @entity {
 }
 
 type DoubleLayerStakingL2TokenIdRewardDebt @entity {
+  id: Bytes!
+  contractAddress: Bytes!
+  tokenId: BigInt!
+  rewardDebt: BigInt!
+  agent: Agent!
+}
+
+type DoubleLayerStakingL2TokenIdRewardDebtOld @entity {
   id: Bytes!
   contractAddress: Bytes!
   tokenId: BigInt!

@@ -95,9 +95,9 @@ dataSources:
     name: DoubleLayerStaking
     network: sepolia
     source:
-      address: "0xd02B90B84eA26BAA805c4005Bce35A98a16e50c1"
+      address: "0x9b18b3c194c8d904bea556dea620ff60ada2d27e"
       abi: DoubleLayerStaking
-      startBlock: 6194857
+      startBlock: 6349707
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -114,6 +114,10 @@ dataSources:
           file: ./abis/DoubleLayerStaking.json
         - name: ERC20
           file: ./abis/ERC20.json
+        - name: Agency
+          file: ./abis/Agency.json
+        - name: Agent
+          file: ./abis/Agent.json
       eventHandlers:
         - event: Stake(indexed address,indexed address,uint256)
           handler: handleStakeEvent
@@ -138,7 +142,61 @@ dataSources:
           handler: handleClaimDotAgency
         - function: exec(bytes4,bytes)
           handler: handleExec
+        - function: forceUpdateRewardL1(address)
+          handler: handleForceUpdateRewardL1
       file: ./src/staking.ts
+  - kind: ethereum
+    name: DoubleLayerStakingOld
+    network: sepolia
+    source:
+      address: "0xd02B90B84eA26BAA805c4005Bce35A98a16e50c1"
+      abi: DoubleLayerStaking
+      startBlock: 6194857
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      entities:
+        - DoubleLayerStakingL2Old
+        - Agent
+        - Currency
+        - DoubleLayerCreatorAccountOld
+        - DoubleLayerDotAgencyOld
+        - DoubleLayerStakingL2TokenIdRewardDebtOld
+      abis:
+        - name: DoubleLayerStaking
+          file: ./abis/DoubleLayerStakingOld.json
+        - name: ERC20
+          file: ./abis/ERC20.json
+        - name: Agency
+          file: ./abis/Agency.json
+        - name: Agent
+          file: ./abis/Agent.json
+      eventHandlers:
+        - event: Stake(indexed address,indexed address,uint256)
+          handler: handleStakeEvent
+        - event: Unstake(indexed address,indexed address,uint256)
+          handler: handleUnStakeEvent
+      callHandlers:
+        - function: stake(address,uint256)
+          handler: handleStake
+        - function: unstake(address,uint256)
+          handler: handleUnstake
+        - function: withdrawReward(address,uint256)
+          handler: handleWithdrawReward
+        - function: updateRewardL1(address)
+          handler: handleUpdateRewardL1
+        - function: updatePoolL2(address)
+          handler: handleUpdatePoolL2
+        - function: updateRewardL2(address)
+          handler: handleUpdateRewardL2
+        - function: claim(address)
+          handler: handleClaimCreator
+        - function: claim(uint256)
+          handler: handleClaimDotAgency
+        - function: exec(bytes4,bytes)
+          handler: handleExec
+      file: ./src/stakingOld.ts
   - kind: ethereum
     name: PremiumDAO
     network: sepolia
@@ -257,6 +315,8 @@ templates:
           file: ./abis/Agency.json
         - name: Agent
           file: ./abis/Agent.json
+        - name: ERC20
+          file: ./abis/ERC20.json
       eventHandlers:
         - event: Wrap(indexed address,indexed uint256,uint256,uint256)
           handler: handleWrap
@@ -274,6 +334,9 @@ templates:
           handler: handleRenounceForceApprove
         - event: RenounceForceCancel()
           handler: handleRenounceForceCancel
+      callHandlers:
+        - function: rebase()
+          handler: handleRebase
       file: ./src/agency.ts
   - name: Erc6551
     kind: ethereum/contract

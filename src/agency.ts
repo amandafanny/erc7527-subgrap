@@ -4,7 +4,8 @@ import {
   Agent,
   AgentActivity,
 } from "../generated/schema";
-import { Address, Bytes, dataSource } from "@graphprotocol/graph-ts";
+import { Bytes, dataSource } from "@graphprotocol/graph-ts";
+import { getAgencyBalance } from ".";
 import {
   Unwrap as UnwrapEvent,
   Wrap as WrapEvent,
@@ -13,7 +14,8 @@ import {
   RenounceForceApprove as RenounceForceApproveEvent,
   RenounceForceCancel as RenounceForceCancelEvent,
   Agency,
-} from "../generated/Factory/Agency";
+  RebaseCall,
+} from "../generated/templates/Agency/Agency";
 
 export function handleWrap(event: WrapEvent): void {
   const context = dataSource.context();
@@ -23,7 +25,6 @@ export function handleWrap(event: WrapEvent): void {
   const price = event.params.premium;
   const fee = event.params.fee;
   const appInstance = context.getString("appInstance");
-  const agencyInstance = context.getString("agencyInstance");
 
   const agentEntity = Agent.load(
     Bytes.fromUTF8(appInstance.concat("-").concat(tokenId.toString()))
@@ -46,14 +47,17 @@ export function handleWrap(event: WrapEvent): void {
     agentActivityEntity.agent = agentEntity.id;
     agentActivityEntity.save();
   }
-  const agencyEntity = AgencyInstance.load(Address.fromString(agencyInstance));
+  const agencyInstance = dataSource.address();
+  const agencyEntity = AgencyInstance.load(agencyInstance);
   if (agencyEntity !== null) {
-    const agencyContract = Agency.bind(dataSource.address());
+    const agencyContract = Agency.bind(agencyInstance);
     const feeCount = agencyContract.feeCount();
     const perTokenReward = agencyContract.perTokenReward();
+    const balance = getAgencyBalance(agencyInstance);
     agencyEntity.swap = price;
     agencyEntity.fee = fee;
-    agencyEntity.tvl = agencyEntity.tvl.plus(price);
+    agencyEntity.tvl = balance;
+    agencyEntity.pureTvl = agencyEntity.tvl.plus(price);
     agencyEntity.feeCount = feeCount;
     agencyEntity.perTokenReward = perTokenReward;
     agencyEntity.save();
@@ -68,7 +72,6 @@ export function handleUnwrap(event: UnwrapEvent): void {
   const price = event.params.premium;
   const fee = event.params.fee;
   const appInstance = context.getString("appInstance");
-  const agencyInstance = context.getString("agencyInstance");
 
   const agentEntity = Agent.load(
     Bytes.fromUTF8(appInstance.concat("-").concat(tokenId.toString()))
@@ -92,14 +95,18 @@ export function handleUnwrap(event: UnwrapEvent): void {
     agentActivityEntity.save();
   }
 
-  const agencyEntity = AgencyInstance.load(Address.fromString(agencyInstance));
+  const agencyInstance = dataSource.address();
+
+  const agencyEntity = AgencyInstance.load(agencyInstance);
   if (agencyEntity !== null) {
-    const agencyContract = Agency.bind(dataSource.address());
+    const agencyContract = Agency.bind(agencyInstance);
     const feeCount = agencyContract.feeCount();
     const perTokenReward = agencyContract.perTokenReward();
+    const balance = getAgencyBalance(agencyInstance);
     agencyEntity.swap = price;
     agencyEntity.fee = fee;
-    agencyEntity.tvl = agencyEntity.tvl.minus(price);
+    agencyEntity.tvl = balance;
+    agencyEntity.pureTvl = agencyEntity.tvl.minus(price);
     agencyEntity.feeCount = feeCount;
     agencyEntity.perTokenReward = perTokenReward;
     agencyEntity.save();
@@ -107,14 +114,13 @@ export function handleUnwrap(event: UnwrapEvent): void {
 }
 
 export function handleForceApprove(event: ForceApproveEvent): void {
-  const context = dataSource.context();
-
   const selector = event.params.selector;
   const target = event.params.target;
-  const agencyInstance = context.getString("agencyInstance");
+  const agencyInstance = dataSource.address();
 
   const agencyApproveEntityId = Bytes.fromUTF8(
     agencyInstance
+      .toHexString()
       .concat("-")
       .concat(target.toHexString())
       .concat("-")
@@ -125,21 +131,20 @@ export function handleForceApprove(event: ForceApproveEvent): void {
     agencyApproveEntity = new AgencyApprove(agencyApproveEntityId);
     agencyApproveEntity.target = target;
     agencyApproveEntity.selector = selector;
-    agencyApproveEntity.address = Address.fromString(agencyInstance);
+    agencyApproveEntity.address = agencyInstance;
   }
   agencyApproveEntity.value = true;
   agencyApproveEntity.save();
 }
 
 export function handleForceCancel(event: ForceCancelEvent): void {
-  const context = dataSource.context();
-
   const selector = event.params.selector;
   const target = event.params.target;
-  const agencyInstance = context.getString("agencyInstance");
+  const agencyInstance = dataSource.address();
 
   const agencyApproveEntityId = Bytes.fromUTF8(
     agencyInstance
+      .toHexString()
       .concat("-")
       .concat(target.toHexString())
       .concat("-")
@@ -150,7 +155,7 @@ export function handleForceCancel(event: ForceCancelEvent): void {
     agencyApproveEntity = new AgencyApprove(agencyApproveEntityId);
     agencyApproveEntity.target = target;
     agencyApproveEntity.selector = selector;
-    agencyApproveEntity.address = Address.fromString(agencyInstance);
+    agencyApproveEntity.address = agencyInstance;
   }
   agencyApproveEntity.value = false;
   agencyApproveEntity.save();
@@ -159,10 +164,9 @@ export function handleForceCancel(event: ForceCancelEvent): void {
 export function handleRenounceForceApprove(
   event: RenounceForceApproveEvent
 ): void {
-  const context = dataSource.context();
-  const agencyInstance = context.getString("agencyInstance");
+  const agencyInstance = dataSource.address();
 
-  const agencyEntity = AgencyInstance.load(Address.fromString(agencyInstance));
+  const agencyEntity = AgencyInstance.load(agencyInstance);
   if (agencyEntity !== null) {
     agencyEntity.isRenounceForceApprove = true;
     agencyEntity.save();
@@ -172,12 +176,22 @@ export function handleRenounceForceApprove(
 export function handleRenounceForceCancel(
   event: RenounceForceCancelEvent
 ): void {
-  const context = dataSource.context();
-  const agencyInstance = context.getString("agencyInstance");
+  const agencyInstance = dataSource.address();
 
-  const agencyEntity = AgencyInstance.load(Address.fromString(agencyInstance));
+  const agencyEntity = AgencyInstance.load(agencyInstance);
   if (agencyEntity !== null) {
     agencyEntity.isRenounceForceCancel = true;
+    agencyEntity.save();
+  }
+}
+
+export function handleRebase(event: RebaseCall): void {
+  const agencyInstance = dataSource.address();
+
+  const agencyEntity = AgencyInstance.load(agencyInstance);
+  if (agencyEntity !== null) {
+    const balance = getAgencyBalance(agencyInstance);
+    agencyEntity.tvl = balance;
     agencyEntity.save();
   }
 }

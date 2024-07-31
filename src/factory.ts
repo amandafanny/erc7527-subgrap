@@ -2,7 +2,7 @@ import { Bytes, DataSourceContext, log } from "@graphprotocol/graph-ts";
 import { Deploy as DeployEvent } from "../generated/Factory/Factory";
 import { DeployV2 } from "../generated/schema";
 import { Agency as AgencyContract, Agent } from "../generated/templates";
-import { setAgencyInstance, setAppInstance } from ".";
+import { setFactory } from ".";
 
 export function handleDeploy(event: DeployEvent): void {
   const deployEntity = new DeployV2(event.transaction.hash);
@@ -13,13 +13,17 @@ export function handleDeploy(event: DeployEvent): void {
   const appInstance = event.params.appInstance;
   const tokenId = event.params.tokenId;
 
-  const agencyInstanceEntity = setAgencyInstance(agencyInstance);
-  const appInstanceEntity = setAppInstance(appInstance, false);
+  setFactory(
+    appInstance,
+    appImplementation,
+    agencyInstance,
+    agencyImplementation
+  );
 
   deployEntity.agencyImplementation = agencyImplementation;
-  deployEntity.agencyInstance = agencyInstanceEntity.id;
+  deployEntity.agencyInstance = agencyInstance;
   deployEntity.appImplementation = appImplementation;
-  deployEntity.appInstance = appInstanceEntity.id;
+  deployEntity.appInstance = appInstance;
   deployEntity.transactionHash = event.transaction.hash;
   deployEntity.tokenId = Bytes.fromByteArray(Bytes.fromBigInt(tokenId));
   deployEntity.blockNumber = event.block.number;

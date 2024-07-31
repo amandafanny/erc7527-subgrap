@@ -21,11 +21,6 @@ export function handleDeposit(event: DepositEvent): void {
     lpEntity.rewardToken = currency.id;
   }
 
-  if (holder.lp === null) {
-    holder.lp = lpEntity.id;
-    holder.save();
-  }
-
   lpEntity.holder = holder.id;
   lpEntity.amount = userInfo.getAmount();
   lpEntity.rewardDebt = userInfo.getRewardDebt();

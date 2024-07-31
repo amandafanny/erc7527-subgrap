@@ -1,4 +1,4 @@
-specVersion: 1.1.0
+specVersion: 1.0.0
 description: Erc7527
 repository: https://github.com/amandafanny/erc7527-subgraph.git
 schema:
@@ -13,7 +13,7 @@ dataSources:
       startBlock: 6194794
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - DeployV2
@@ -43,7 +43,7 @@ dataSources:
       startBlock: 6194521
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - DotAgency
@@ -73,7 +73,7 @@ dataSources:
       startBlock: 6190866
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - Currency
@@ -97,10 +97,10 @@ dataSources:
     source:
       address: "0x9b18b3c194c8d904bea556dea620ff60ada2d27e"
       abi: DoubleLayerStaking
-      startBlock: 20189136
+      startBlock: 6349707
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - DoubleLayerStakingL2
@@ -152,7 +152,7 @@ dataSources:
       startBlock: 6194857
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - DoubleLayerStakingL2Old
@@ -202,7 +202,7 @@ dataSources:
       startBlock: 6190861
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - PremiumDAO
@@ -228,7 +228,7 @@ dataSources:
       startBlock: 6195781
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - Execute
@@ -248,7 +248,7 @@ dataSources:
   #     startBlock: 5939536
   #   mapping:
   #     kind: ethereum/events
-  #     apiVersion: 0.0.9
+  #     apiVersion: 0.0.8
   #     language: wasm/assemblyscript
   #     entities:
   #       - Bond
@@ -267,7 +267,7 @@ templates:
       abi: Agent
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - Agent
@@ -300,7 +300,7 @@ templates:
       abi: Agency
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - AgencyInstance
@@ -336,7 +336,7 @@ templates:
       abi: Erc6551
     mapping:
       kind: ethereum/events
-      apiVersion: 0.0.9
+      apiVersion: 0.0.8
       language: wasm/assemblyscript
       entities:
         - Execute

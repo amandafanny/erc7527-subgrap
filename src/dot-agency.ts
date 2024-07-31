@@ -11,7 +11,7 @@ import {
   NewResolver as NewResolverEvent,
   Mint as MintEvent,
 } from "../generated/DotAgency/DotAgency";
-import { addressZero, setHolder } from ".";
+import { setHolder } from ".";
 import { Erc6551 as Erc6551Contract } from "../generated/templates";
 import { DotAgency, Erc6551, Node, Resolver } from "../generated/schema";
 import { setErc6551Zero } from "./erc6551";

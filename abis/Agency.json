@@ -51,25 +51,6 @@
   },
   {
     "type": "function",
-    "name": "_getPrice",
-    "inputs": [
-      {
-        "name": "app",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "currentPrice",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "approve",
     "inputs": [
       {
@@ -324,7 +305,7 @@
     "name": "iconstructor",
     "inputs": [],
     "outputs": [],
-    "stateMutability": "pure"
+    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -903,22 +884,6 @@
       },
       {
         "name": "available",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
-    "name": "WrapV2AutionInsufficientFunds",
-    "inputs": [
-      {
-        "name": "expectation",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "reality",
         "type": "uint256",
         "internalType": "uint256"
       }
