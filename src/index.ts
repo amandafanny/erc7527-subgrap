@@ -96,11 +96,19 @@ export const setFactory = (
   appInstanceEntity.appImplementation = appImplementation;
   const name = agentContract.try_name();
   appInstanceEntity.totalSupply = new BigInt(0);
+  const maxSupply = agentContract.try_getMaxSupply();
   if (name.reverted) {
     appInstanceEntity.name = "";
   } else {
     appInstanceEntity.name = name.value;
   }
+
+  if (maxSupply.reverted) {
+    appInstanceEntity.maxSupply = new BigInt(0);
+  } else {
+    appInstanceEntity.maxSupply = maxSupply.value;
+  }
+
   appInstanceEntity.save();
 
   agencyInstanceEntity.isRenounceForceApprove = false;

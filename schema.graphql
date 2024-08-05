@@ -13,6 +13,7 @@ type AppInstance @entity {
   id: Bytes!
   name: String!
   totalSupply: BigInt!
+  maxSupply: BigInt!
   address: Bytes!
   doubleLayerStakingL2: DoubleLayerStakingL2 @derivedFrom(field: "appInstance")
   doubleLayerStakingL2Old: DoubleLayerStakingL2Old
